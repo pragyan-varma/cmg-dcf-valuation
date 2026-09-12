@@ -7,6 +7,10 @@ Every historical figure comes from Chipotle's SEC filings, every input cell carr
 a source note inside the workbook, and every calculated cell in the Excel output is
 a **live formula** — click any number and trace it back to an input.
 
+**Just want to look at the model?** Download
+[`output/CMG_DCF_Model.xlsx`](output/CMG_DCF_Model.xlsx). It opens in Excel with all
+formulas intact; everything else here is the code that generates it.
+
 ---
 
 ## Headline result
@@ -23,14 +27,19 @@ a **live formula** — click any number and trace it back to an input.
 | Terminal value as % of EV | 78.2% |
 | Sensitivity range (Table A) | $14.13 – $29.71 |
 
-**The conclusion is not "the model is broken."** On GDP-anchored terminal assumptions
-and a CAPM cost of capital, the DCF cannot reproduce the ~20.5x EV/EBITDA the market
-pays for Chipotle. The Gordon Growth terminal value implies an exit multiple of only
-**8.6x** EBITDA, while backing into the market's price requires a perpetual growth
-rate of roughly **5.9%** — far above nominal GDP. That gap *is* the finding: the share
-price embeds a growth and durability premium that a conventional DCF does not capture.
-Being able to explain that gap is the point of the exercise. See
-[`docs/walkthrough.md`](docs/walkthrough.md).
+**Reading the gap.** On GDP-anchored terminal assumptions and a CAPM cost of capital,
+the DCF does not reproduce the ~20.5x EV/EBITDA the market pays for Chipotle. The
+Gordon Growth terminal value implies an exit multiple of 8.6x EBITDA; backing into the
+market price instead requires perpetual growth of roughly 5.9%, well above nominal GDP.
+
+So the useful output is a decomposition rather than a price target — the market is
+paying for growth and durability beyond what a five-year DCF anchored to GDP can
+capture. The reasoning behind each assumption is in
+[`docs/methodology.md`](docs/methodology.md).
+
+> Market inputs (share price, 10-year Treasury yield, beta) were retrieved
+> **2026-09-06** and do not refresh on their own. To re-run against current data, edit
+> `src/wacc.py` and `src/assumptions.py` and rebuild.
 
 ---
 
@@ -53,9 +62,6 @@ Being able to explain that gap is the point of the exercise. See
     ├── methodology.md         # why each assumption was chosen
     └── walkthrough.md         # interview prep: how to explain this model
 ```
-
-> Note: the project is laid out at the repository root rather than inside a nested
-> `cmg-dcf-valuation/` folder, since the repository itself already serves that purpose.
 
 ## How to run
 
@@ -108,9 +114,9 @@ calculations**, **green tabs are outputs**.
 - **Blue font** — hardcoded input or historical actual (the only cells you should change)
 - **Black font** — formula referencing cells on the same sheet
 - **Green font** — formula linking to another sheet
-- **No hardcoded numbers inside formulas.** A scan of all 1,477 calculated cells found
-  only the year indices `1..5` used to build the discount period; every assumption is
-  referenced from its input cell.
+- **No hardcoded numbers inside formulas.** A scan of all 548 formula cells found no
+  embedded assumption values — the only numeric literals are the year indices `1`–`5`
+  that build the discount period. Every assumption is referenced from its input cell.
 - $ in millions to one decimal; percentages to one decimal (WACC and growth to two);
   share prices to two decimals; multiples as `0.0x`
 - Freeze panes on the header rows, column widths set, print areas set to
@@ -144,9 +150,10 @@ All financial data was pulled directly from SEC EDGAR on **2026-09-06**.
 
 **1. Terminal value is 78.2% of enterprise value.** This is normal for a company still
 growing units ~7% a year, but it means the answer is a statement about the discount rate
-and terminal assumptions far more than about the five forecast years. This is why the
-Sensitivity tab, not the base case, is the real output. Mitigations built in: the terminal
-year is normalised (see below), and both implied cross-checks are shown and flagged.
+and terminal assumptions far more than about the five forecast years. That makes the
+sensitivity tables more informative than the point estimate. Two things partly offset it:
+the terminal year is normalised (see below), and both implied cross-checks are shown and
+flagged on the tab.
 
 **2. The two terminal methods disagree sharply.** Gordon Growth implies an 8.6x exit
 multiple; an 18.0x exit multiple implies 5.9% perpetual growth. Both are flagged
@@ -182,8 +189,7 @@ raw return data or cross-checked against a peer set of unlevered betas.
 
 ## Open Items
 
-Things I could not fully verify, or where a defensible alternative exists. Listed rather
-than papered over.
+Things I could not fully verify, and places where a defensible alternative exists.
 
 1. **Equity risk premium.** The model uses **5.0%**, the low end of the 5.0–5.5% mature-market
    range. Damodaran's *implied* ERP for the S&P 500 on 2026-09-01 was **4.14%**. Using 4.14%
@@ -258,4 +264,5 @@ than papered over.
 
 ---
 
-*Built as a resume project for finance internship recruiting. Not investment advice.*
+*Independent student project, built for portfolio and interview-preparation purposes.
+Not investment advice and not a recommendation to buy or sell any security.*
