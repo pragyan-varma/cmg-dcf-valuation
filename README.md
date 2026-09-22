@@ -55,6 +55,7 @@ capture. The reasoning behind each assumption is in
 │   ├── assumptions.py         # all forecast drivers, each with a SOURCE string
 │   ├── wacc.py                # WACC / CAPM inputs and calculation
 │   ├── build_model.py         # generates the .xlsx
+│   ├── cache_values.py        # writes cached results so values render everywhere
 │   └── verify_model.py        # recalculates the workbook and asserts it ties
 ├── output/
 │   └── CMG_DCF_Model.xlsx     # 8-tab, formula-driven model
@@ -71,20 +72,30 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 python src/build_model.py          # writes output/CMG_DCF_Model.xlsx
+python src/cache_values.py         # writes cached values into it (see note below)
+python src/verify_model.py         # recalculates and asserts the model ties
+
 open output/CMG_DCF_Model.xlsx     # Windows: start output\CMG_DCF_Model.xlsx
 ```
 
 To change an assumption, edit `src/assumptions.py` (or `src/wacc.py` for cost of
-capital) and re-run. The whole model rebuilds in under a second.
+capital) and re-run those three commands. The build itself takes about 0.15s.
 
-Optional — recalculate every formula and assert the model ties, without opening Excel:
+### Why the `cache_values.py` step exists
 
-```bash
-pip install formulas
-python src/verify_model.py
-```
+openpyxl writes a cell's formula but cannot write a cached result next to it. Excel,
+Google Sheets and LibreOffice don't care — they recalculate on load. But every viewer
+*without* a calculation engine renders those cells **blank**: macOS Quick Look and
+Preview, in-browser spreadsheet previews, and most phone and webmail attachment
+viewers. Someone glancing at the raw file would see labels and blue inputs and no
+share price.
 
-Current output: **10/10 checks passed**. It verifies that there are no `#REF!`,
+`cache_values.py` recalculates the workbook and writes each result into the cell's
+value element, exactly as Excel does when it saves. The formula is left untouched, so
+the model stays fully auditable, and `fullCalcOnLoad` is set so Excel still
+recalculates on open — a cached value can never go stale against an edited input.
+
+`verify_model.py` output: **10/10 checks passed**. It verifies that there are no `#REF!`,
 `#DIV/0!`, `#VALUE!` or `#N/A` values anywhere; that the built EBIT ties to EBIT as
 reported in every one of the five historical years; that the built restaurant count
 ties to the count in the 10-K; that the valuation bridge is internally consistent;
