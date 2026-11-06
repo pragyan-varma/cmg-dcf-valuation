@@ -6,7 +6,7 @@ This exists because openpyxl writes formulas but does not evaluate them - the
 workbook on disk has no cached values until Excel opens it once. This script
 closes that gap so the build can be checked in CI or from the terminal.
 
-    pip install formulas
+    pip install -r requirements.txt
     python src/verify_model.py
 
 Checks performed
@@ -33,7 +33,7 @@ XLSX = os.path.join(ROOT, "output", "CMG_DCF_Model.xlsx")
 try:
     import formulas
 except ImportError:
-    sys.exit("This script needs the optional 'formulas' package:  pip install formulas")
+    sys.exit("This script needs the 'formulas' package:  pip install -r requirements.txt")
 
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter

@@ -1,0 +1,35 @@
+name: Build and verify
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Keep a copy of the committed workbook
+        run: cp output/CMG_DCF_Model.xlsx "$RUNNER_TEMP/committed.xlsx"
+
+      - name: Build the workbook
+        run: python src/build_model.py
+
+      - name: Write cached values
+        run: python src/cache_values.py
+
+      - name: Verify the model ties
+        run: python src/verify_model.py
+
+      - name: Check the committed workbook matches a fresh build
+        run: python src/compare_workbooks.py "$RUNNER_TEMP/committed.xlsx" output/CMG_DCF_Model.xlsx

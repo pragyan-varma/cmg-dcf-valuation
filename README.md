@@ -1,5 +1,7 @@
 # Chipotle Mexican Grill (NYSE: CMG) — DCF Valuation Model
 
+[![Build and verify](https://github.com/pragyan-varma/cmg-dcf-valuation/actions/workflows/verify.yml/badge.svg)](https://github.com/pragyan-varma/cmg-dcf-valuation/actions/workflows/verify.yml)
+
 A fully formula-driven discounted cash flow valuation of Chipotle Mexican Grill,
 generated programmatically with Python and `openpyxl`.
 
@@ -72,7 +74,7 @@ such as Bloomberg or Capital IQ, comparable-companies and precedent-transaction 
 ├── README.md                  # this file
 ├── ROADMAP.md                 # planned work, ordered by dependency
 ├── requirements.txt
-├── .github/                   # issue and pull request templates
+├── .github/                   # issue/PR templates and the CI workflow
 ├── data/
 │   └── historicals.csv        # every raw pulled figure, with a source column
 ├── src/
@@ -80,7 +82,8 @@ such as Bloomberg or Capital IQ, comparable-companies and precedent-transaction 
 │   ├── wacc.py                # WACC / CAPM inputs and calculation
 │   ├── build_model.py         # generates the .xlsx
 │   ├── cache_values.py        # writes cached results so values render everywhere
-│   └── verify_model.py        # recalculates the workbook and asserts it ties
+│   ├── verify_model.py        # recalculates the workbook and asserts it ties
+│   └── compare_workbooks.py   # CI: checks the committed workbook matches a fresh build
 ├── output/
 │   └── CMG_DCF_Model.xlsx     # 8-tab, formula-driven model
 └── docs/
@@ -90,6 +93,8 @@ such as Bloomberg or Capital IQ, comparable-companies and precedent-transaction 
 ```
 
 ## How to run
+
+Requires Python 3.14, the version CI runs. Other versions are untested.
 
 ```bash
 python3 -m venv .venv
@@ -126,6 +131,11 @@ reported in every one of the five historical years; that the built restaurant co
 ties to the count in the 10-K; that the valuation bridge is internally consistent;
 that both sensitivity tables' base-case cells equal the bridge's implied price; and
 that terminal growth is below WACC.
+
+CI ([`.github/workflows/verify.yml`](.github/workflows/verify.yml)) runs the same three
+commands on every push and pull request. It fails if any check fails, or if the committed
+workbook differs from a fresh build in any cell's formula or cached value
+(`src/compare_workbooks.py`).
 
 ---
 
