@@ -43,12 +43,36 @@ capture. The reasoning behind each assumption is in
 
 ---
 
+## Scope
+
+**Who it's for.** An analyst or reviewer who needs to trace every number in a DCF back to
+a filing and stress-test the assumptions behind it: someone checking the model before
+relying on its reasoning, or probing how it was built. These are assumed users, not
+researched ones; see [Assumptions](ROADMAP.md#assumptions).
+
+**In scope.** Chipotle (CMG) only. A five-year (FY2026E–FY2030E) unlevered DCF built from
+FY2021–FY2025 10-K data, a Gordon Growth terminal value cross-checked against an exit
+multiple, two sensitivity tables, and a script that recalculates the workbook and checks
+that it ties.
+
+**Out of scope.** Investment advice or a price target (the implied price is a
+decomposition of what the market is paying for, not a recommendation), non-public data
+such as Bloomberg or Capital IQ, comparable-companies and precedent-transaction analysis
+(comps is on the roadmap), and automatic refresh of the market inputs.
+
+**Project docs.** [Roadmap](ROADMAP.md) · [Decision log](docs/decisions.md) ·
+[Backlog](https://github.com/pragyan-varma/cmg-dcf-valuation/issues)
+
+---
+
 ## Repository layout
 
 ```
 .
 ├── README.md                  # this file
+├── ROADMAP.md                 # planned work, ordered by dependency
 ├── requirements.txt
+├── .github/                   # issue and pull request templates
 ├── data/
 │   └── historicals.csv        # every raw pulled figure, with a source column
 ├── src/
@@ -61,6 +85,7 @@ capture. The reasoning behind each assumption is in
 │   └── CMG_DCF_Model.xlsx     # 8-tab, formula-driven model
 └── docs/
     ├── methodology.md         # why each assumption was chosen
+    ├── decisions.md           # design decisions and their tradeoffs
     └── walkthrough.md         # interview prep: how to explain this model
 ```
 
@@ -170,7 +195,9 @@ flagged on the tab.
 multiple; an 18.0x exit multiple implies 5.9% perpetual growth. Both are flagged
 automatically on the Terminal Value tab. I have not "split the difference" — the Gordon
 Growth number is the base case because it is the one anchored to fundamentals, and the
-disagreement is disclosed rather than averaged away.
+disagreement is disclosed rather than averaged away. A reverse DCF
+([#5](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/5)) and a comps screen
+([#8](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/8)) are planned to test it.
 
 **3. Terminal-year capex is normalised, and that is a judgement call.** FY2030E capex runs
 at 5.6% of revenue to fund ~370 new restaurants. Perpetuating that alongside 2.25% growth
@@ -188,19 +215,24 @@ would also multiply the number of assumptions without necessarily improving the 
 **5. Timing gap between the valuation date and the market price.** The model is struck at
 fiscal year-end 12/31/2025 (the balance-sheet date of the most recent 10-K) and compared to
 a 2026-09-04 market price. Roughly eight months of value accretion is not rolled forward,
-which makes the implied downside modestly overstated. See Open Items.
+which makes the implied downside modestly overstated. See Open Items. Tracked in
+[#7](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/7).
 
 **6. This is a standalone DCF.** There is no comparable-companies or precedent-transactions
-analysis. A full valuation would triangulate across all three.
+analysis. A full valuation would triangulate across all three. Comps is tracked in
+[#8](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/8).
 
 **7. Beta is a single point estimate from one secondary source** rather than regressed from
-raw return data or cross-checked against a peer set of unlevered betas.
+raw return data or cross-checked against a peer set of unlevered betas. Tracked in
+[#8](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/8).
 
 ---
 
 ## Open Items
 
-Things I could not fully verify, and places where a defensible alternative exists.
+Things I could not fully verify, and places where a defensible alternative exists. These
+describe the model as it stands. Where an item implies future work, it links to the issue
+that tracks it; the full plan is in [ROADMAP.md](ROADMAP.md).
 
 1. **Equity risk premium.** The model uses **5.0%**, the low end of the 5.0–5.5% mature-market
    range. Damodaran's *implied* ERP for the S&P 500 on 2026-09-01 was **4.14%**. Using 4.14%
@@ -211,7 +243,8 @@ Things I could not fully verify, and places where a defensible alternative exist
 2. **Beta source.** 0.94 is stockanalysis.com's 5-year monthly beta, retrieved 2026-09-06 — a
    secondary source. I do not have Bloomberg or Capital IQ access to cross-check it, and I
    have not regressed it from raw returns. Beta feeds WACC linearly, so a 0.85–1.05 range
-   would move WACC by roughly ±50bps.
+   would move WACC by roughly ±50bps. A peer beta cross-check is tracked in
+   [#8](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/8).
 
 3. **FY2021 and FY2022 AUV are disclosed to only one decimal** ($2.6m and $2.8m) in the
    filings of those years. That imprecision is why the computed revenue realisation factor
@@ -228,11 +261,13 @@ Things I could not fully verify, and places where a defensible alternative exist
    outstanding (FY2025 10-K cover, as of 2026-01-30). The Q2 2026 10-Q cover reports
    **1,265,418k** as of 2026-07-24 after further buybacks. Using the current count on the
    current balance sheet would raise the implied price by roughly 3%, but would be
-   inconsistent with a 12/31/2025 valuation date and cash balance.
+   inconsistent with a 12/31/2025 valuation date and cash balance. Moving the valuation
+   date is tracked in [#7](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/7).
 
 6. **No stub period.** H1 2026 actuals (revenue $6,436.8m, operating income $922.7m) inform
    the FY2026E assumptions but the model does not discount a partial year. A mid-year-2026
-   valuation date with a stub would be more precise and materially more complex.
+   valuation date with a stub would be more precise and materially more complex. Tracked
+   in [#7](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/7).
 
 7. **Cash and investments definition.** "Cash and investments" of $1,246.3m at 12/31/2025 =
    cash and equivalents + short-term investments + long-term investments. The long-term line
@@ -255,7 +290,8 @@ Things I could not fully verify, and places where a defensible alternative exist
     leases-as-operating-expense basis. Screeners that capitalise operating leases as debt
     report a materially higher EV and a different multiple — stockanalysis.com shows total debt
     of $5.42bn for CMG, which is the ~$5.08bn of lease liabilities. The two are not comparable;
-    mine is consistent with the rest of this model.
+    mine is consistent with the rest of this model. A lease-capitalised version is tracked in
+    [#6](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/6).
 
 11. **FY2026 openings are inferred.** Management guided to 350–370 total restaurants including
     10–15 partner-operated. The model takes the midpoint (360) less ~13 partner-operated = 347
@@ -263,15 +299,15 @@ Things I could not fully verify, and places where a defensible alternative exist
 
 ---
 
-## What I would build next
+## Roadmap
 
-- A comparable-companies screen (QSR peers: MCD, YUM, WING, SG, CAVA) to test whether the
-  8.6x implied exit multiple or the 20.5x traded multiple is the outlier
-- A reverse DCF that solves for the growth and margin path implied by $36.96, which is the
-  more useful framing given the size of the gap
-- A parallel lease-capitalised version of the model to demonstrate that the two treatments
-  converge when applied consistently
-- A quarterly stub-period model with a mid-2026 valuation date
+Planned work lives in [ROADMAP.md](ROADMAP.md), ordered Now / Next / Later by dependency,
+with each item tracked as an [issue](https://github.com/pragyan-varma/cmg-dcf-valuation/issues).
+Now: run the verification script in CI, fix figures that don't match the model, and fix
+an input cell that has no effect. Next:
+centre the sensitivity tables on the live base case, and a reverse DCF. Later: a
+lease-capitalised version, a mid-2026 valuation date with a stub period, and a comps
+screen with a peer beta cross-check. None of it is built yet.
 
 ---
 

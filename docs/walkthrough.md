@@ -123,7 +123,7 @@ available from a DCF.
 
 The honest framing: **the DCF is a bad tool for pricing a premium growth business and a very good
 tool for interrogating one.** If I were making a real recommendation I'd triangulate with comps
-and a reverse DCF — which is the first thing on my "what I'd build next" list.
+and a reverse DCF — which is the first new piece of analysis on my roadmap.
 
 ### 2. "Why is your terminal value 78% of enterprise value? Doesn't that make the model useless?"
 
