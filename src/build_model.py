@@ -530,6 +530,7 @@ def build_assumptions(s, hist):
           [f"={c}{s.rows['rev']}/{p}{s.rows['rev']}-1" for c, p in zip(C[1:], C[:-1])],
           fmt=FMT_PCT, indent=1)
     s.row("rev_cagr", "Memo: FY2025A-FY2030E revenue CAGR", "%",
+          # Exponent is re-pointed at the forecast-period cell once that row exists.
           [None, None, None, None, f"=(G{s.rows['rev']}/{HN}!G{hr['rev']})^(1/5)-1"],
           fmt=FMT_PCT, italic=True)
     s.row("comps", "Memo: comparable restaurant sales growth (context only)", "%",
@@ -571,9 +572,15 @@ def build_assumptions(s, hist):
     s.blank()
 
     s.section("FORECAST PERIOD AND TERMINAL ASSUMPTIONS")
-    s.single("nyears", "Explicit forecast period", "years", 5, fmt='0',
-             color=BLUE, source="FY2026E-FY2030E. Five years is long enough for the margin "
-                                "recovery to play out and short enough to stay credible.")
+    s.single("nyears", "Explicit forecast period (count of forecast columns)", "years",
+             f"=COLUMNS(C{s.hdr_row}:G{s.hdr_row})", fmt='0', color=BLACK,
+             source="FY2026E-FY2030E. Five years is long enough for the margin "
+                    "recovery to play out and short enough to stay credible. Counted from "
+                    "the forecast columns, not typed: the horizon is set by the column "
+                    "layout in build_model.py, so this cell is not an input.")
+    # The revenue CAGR above takes its exponent from the forecast-period cell.
+    s.ws.cell(s.rows["rev_cagr"], 7).value = (
+        f"=(G{s.rows['rev']}/{HN}!G{hr['rev']})^(1/$C${s.rows['nyears']})-1")
     s.single("g", "Terminal growth rate (g)", "%", A.TERMINAL_GROWTH, fmt=FMT_PCT2,
              color=BLUE, bold=True, source=A.TERMINAL_GROWTH_SOURCE)
     s.single("g_chk", "Check: is g below WACC? (required, or the model breaks)", "",

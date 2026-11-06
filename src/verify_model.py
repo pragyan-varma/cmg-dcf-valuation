@@ -18,10 +18,14 @@ Checks performed
 5. Bridge: equity value = EV - debt + cash, and price = equity value / shares.
 6. Sensitivity: the base-case cell of each table equals the bridge's implied price.
 7. Terminal growth is below WACC.
+8. Every blue (hardcoded) input on the Assumptions, WACC, DCF and Terminal Value
+   tabs feeds at least one formula, so no input can be changed to no effect.
+   Rows labelled "Memo" are context only and are exempt.
 """
 from __future__ import annotations
 
 import os
+import re
 import sys
 import warnings
 
@@ -36,9 +40,33 @@ except ImportError:
     sys.exit("This script needs the 'formulas' package:  pip install -r requirements.txt")
 
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import get_column_letter, range_boundaries
 
 ERR_TOKENS = ("#REF!", "#DIV/0!", "#VALUE!", "#NAME?", "#N/A", "#NULL!", "#NUM!")
+BLUE = "FF0000FF"
+INPUT_TABS = ("Assumptions", "WACC", "DCF", "Terminal Value")
+REF_RE = re.compile(r"(?:(?:'([^']+)'|([A-Za-z]+))!)?\$?([A-Z]{1,3})\$?(\d+)"
+                    r"(?::\$?([A-Z]{1,3})\$?(\d+))?")
+
+
+def referenced_cells(wb):
+    """Every (sheet, row, col) that some formula in the workbook points at."""
+    refs = set()
+    for ws in wb.worksheets:
+        for row in ws.iter_rows():
+            for c in row:
+                if not (isinstance(c.value, str) and c.value.startswith("=")):
+                    continue
+                body = re.sub(r'"[^"]*"', "", c.value)      # ignore string literals
+                for m in REF_RE.finditer(body):
+                    sheet = m.group(1) or m.group(2) or ws.title
+                    c1, r1 = m.group(3), m.group(4)
+                    c2, r2 = m.group(5) or c1, m.group(6) or r1
+                    lo_c, lo_r, hi_c, hi_r = range_boundaries(f"{c1}{r1}:{c2}{r2}")
+                    for rr in range(lo_r, hi_r + 1):
+                        for cc in range(lo_c, hi_c + 1):
+                            refs.add((sheet, rr, cc))
+    return refs
 
 
 def main():
@@ -140,6 +168,28 @@ def main():
     g = val("Assumptions", f"C{row_of('Assumptions', 'Terminal growth rate')}")
     w = val("WACC", f"C{row_of('WACC', 'WACC =')}")
     check("terminal growth is below WACC", g < w, f"g={g:.2%} vs WACC={w:.2%}")
+
+    # 8 - every forward-looking input feeds the model
+    print("\nInputs")
+    refs = referenced_cells(wb)
+    orphans = []
+    for name in INPUT_TABS:
+        ws = wb[name]
+        for row in ws.iter_rows():
+            for c in row:
+                if isinstance(c.value, bool) or not isinstance(c.value, (int, float)):
+                    continue
+                if c.font is None or c.font.color is None or c.font.color.rgb != BLUE:
+                    continue
+                label = str(ws.cell(c.row, 1).value or "").strip()
+                if label.lower().startswith("memo"):
+                    continue
+                if (name, c.row, c.column) not in refs:
+                    orphans.append(f"{name}!{c.coordinate} ({label})")
+    check("every blue input feeds at least one formula", not orphans,
+          f"({len(orphans)} unreferenced)" if orphans else "")
+    for o in orphans[:10]:
+        print(f"        {o}")
 
     print(f"\n{checks - len(failures)}/{checks} checks passed.")
     if failures:
