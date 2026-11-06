@@ -10,7 +10,7 @@ summarises it and points to the section.
 
 **Decision.** `build_model.py` writes the workbook with openpyxl. The only numbers typed
 into cells are historical actuals and forecast assumptions. Everything else is an Excel
-formula (548 formula cells in the current build).
+formula (549 formula cells in the current build).
 **Why.** A reviewer can click any output and trace it back to an input inside Excel, and
 the Python source is a reviewable, diffable record of how the model is built.
 **Tradeoff.** openpyxl writes formulas but can't evaluate them, which is why decisions 3
@@ -45,18 +45,19 @@ with an error if any Excel error value is found.
 
 ### 4. Verify the build by recalculating it, not by eye
 
-**Decision.** `verify_model.py` recalculates every formula and asserts seven groups of
-checks, 10 assertions in total: no Excel error values; built EBIT ties to reported EBIT
+**Decision.** `verify_model.py` recalculates every formula and asserts eight groups of
+checks, 11 assertions in total: no Excel error values; built EBIT ties to reported EBIT
 in all five years; built restaurant count ties to the reported count; EV = PV(UFCF) +
 PV(TV); equity value = EV − debt + cash and price = equity / diluted shares; each
-sensitivity table's base-case cell equals the bridge price; and terminal growth is below
-WACC.
+sensitivity table's base-case cell equals the bridge price; terminal growth is below
+WACC; and every blue input on the forecast tabs feeds at least one formula.
 **Why.** Tie-outs and bridge arithmetic are the errors a reviewer would check first, and
 they can be checked mechanically on every build.
 **Tradeoff.** It checks internal consistency, not whether the assumptions are
 reasonable. The error scan skips column B on every sheet, because that column holds `#`
-unit labels. And it only runs when someone runs it, since there's no CI yet
-([#1](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/1)).
+unit labels. CI runs it on every push and pull request
+([#1](https://github.com/pragyan-varma/cmg-dcf-valuation/issues/1)), which takes about 30
+seconds per run and makes `requirements.txt` and the Python version part of the contract.
 
 ### 5. Build revenue as units × AUV × a calibrated realisation factor
 
