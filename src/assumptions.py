@@ -153,8 +153,8 @@ TERMINAL_CAPEX_PCT_OF_REVENUE_SOURCE = (
 
 EXIT_EBITDA_MULTIPLE = 18.0
 EXIT_EBITDA_MULTIPLE_SOURCE = (
-    "Cross-check only. CMG currently trades at ~19.8x LTM EV/EBITDA on a "
-    "leases-as-opex basis (EV of $45.5bn / FY2025 EBITDA of $2,297m; see the WACC "
+    "Cross-check only. CMG currently trades at ~20.5x LTM EV/EBITDA on a "
+    "leases-as-opex basis (EV of $47.1bn / FY2025 EBITDA of $2,297m; see the WACC "
     "and Terminal Value tabs where this is computed from market inputs). 18.0x "
     "applies a modest discount for multiple compression as unit growth decelerates."
 )
