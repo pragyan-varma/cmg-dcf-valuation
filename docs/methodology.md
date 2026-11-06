@@ -386,8 +386,8 @@ analytical output:
 > A GDP-anchored DCF at a CAPM cost of capital says CMG is worth around $20. The market pays
 > $36.96. The difference is not arithmetic — it is the premium the market assigns to Chipotle's
 > brand durability, its runway to 7,000 units, and its historical ability to take price. To
-> justify today's price on this model you need either a materially lower discount rate (roughly
-> 7%, implying the market sees CMG as far less risky than CAPM does) or perpetual growth near
+> justify today's price on this model you need either a materially lower discount rate (about
+> 6.2%, implying the market sees CMG as far less risky than CAPM does) or perpetual growth near
 > 6% (which is not sustainable).
 
 That is a more honest and more interesting conclusion than a number engineered to land near the

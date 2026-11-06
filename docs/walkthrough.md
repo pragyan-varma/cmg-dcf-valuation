@@ -24,7 +24,7 @@ Numbers referenced throughout are the current base case. If you change an assump
 > I get an implied value of about **$20 a share against a market price of $37**. The gap isn't
 > an error — it's the finding. Chipotle trades at **20.5 times EBITDA**, and my Gordon Growth
 > terminal value implies an exit multiple of only **8.6 times**. To justify today's price you'd
-> need either a discount rate near 7%, or perpetual growth near 6% — which is double nominal
+> need either a discount rate of about 6.2%, or perpetual growth near 6% — which is double nominal
 > GDP. So the model's real output is: *here is what the market must believe, and here is why a
 > GDP-anchored DCF can't get there.*
 >
@@ -115,9 +115,9 @@ with the market isn't a rounding issue in my assumptions — it's structural."*
 you what has to be true to justify it. The DCF converts the market price into a set of testable
 statements about growth, margin and risk.
 
-Here the output isn't really "$20, sell." It's: *to pay $37 you need a discount rate near 7% or
+Here the output isn't really "$20, sell." It's: *to pay $37 you need a discount rate of about 6.2% or
 perpetual growth near 6%.* Now you have something to argue about with actual content — is
-Chipotle genuinely 250bps less risky than CAPM implies, given no debt, no franchise complexity
+Chipotle genuinely 325bps less risky than CAPM implies, given no debt, no franchise complexity
 and durable pricing power? Maybe. Can it grow at 6% forever? No. That decomposition is only
 available from a DCF.
 

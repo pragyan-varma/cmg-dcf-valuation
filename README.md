@@ -27,7 +27,7 @@ formulas intact; everything else here is the code that generates it.
 | WACC | 9.48% |
 | Terminal growth | 2.25% |
 | Terminal value as % of EV | 78.2% |
-| Sensitivity range (Table A) | $14.13 – $29.71 |
+| Sensitivity range (both tables) | $14.13 – $29.71 |
 
 **Reading the gap.** On GDP-anchored terminal assumptions and a CAPM cost of capital,
 the DCF does not reproduce the ~20.5x EV/EBITDA the market pays for Chipotle. The
@@ -126,7 +126,8 @@ the model stays fully auditable, and `fullCalcOnLoad` is set so Excel still
 recalculates on open — a cached value can never go stale against an edited input.
 
 `verify_model.py` output: **10/10 checks passed**. It verifies that there are no `#REF!`,
-`#DIV/0!`, `#VALUE!` or `#N/A` values anywhere; that the built EBIT ties to EBIT as
+`#DIV/0!`, `#VALUE!` or `#N/A` values in any calculated cell (column B, which holds
+unit labels such as `#`, is skipped); that the built EBIT ties to EBIT as
 reported in every one of the five historical years; that the built restaurant count
 ties to the count in the 10-K; that the valuation bridge is internally consistent;
 that both sensitivity tables' base-case cells equal the bridge's implied price; and
@@ -160,9 +161,12 @@ calculations**, **green tabs are outputs**.
 - **Blue font** — hardcoded input or historical actual (the only cells you should change)
 - **Black font** — formula referencing cells on the same sheet
 - **Green font** — formula linking to another sheet
-- **No hardcoded numbers inside formulas.** A scan of all 548 formula cells found no
-  embedded assumption values — the only numeric literals are the year indices `1`–`5`
-  that build the discount period. Every assumption is referenced from its input cell.
+- **No hardcoded assumptions inside formulas.** A scan of all 548 formula cells found no
+  embedded assumption values. The numeric literals that do appear are structural (the `1`
+  in `1 + g` and `1 + WACC`, the year indices `1`–`5` that build the discount period, `/2`
+  for average units, `^(1/5)` in the five-year revenue CAGR) or thresholds for the
+  automated flags (such as the ±15% verdict band and the 10x–25x exit-multiple range).
+  Every assumption is referenced from its input cell.
 - $ in millions to one decimal; percentages to one decimal (WACC and growth to two);
   share prices to two decimals; multiples as `0.0x`
 - Freeze panes on the header rows, column widths set, print areas set to
